@@ -11,6 +11,13 @@
     .wrap{max-width:1100px;margin:0 auto;padding:18px}
     header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
     h1{font-size:clamp(22px,4vw,34px);margin:0}.sub{color:var(--muted);font-size:14px}
+    .header-actions{display:flex;align-items:center;flex-shrink:0}
+    .qr-trigger{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;background:#243253;color:#fff;border:1px solid #415374;border-radius:12px;padding:10px 13px;font-weight:800}
+    .qr-dialog{max-width:390px;text-align:center;padding:22px}
+    .qr-dialog .qr-box{display:flex;align-items:center;justify-content:center;min-height:252px;margin:18px auto;padding:14px;width:max-content;max-width:100%;background:#fff;border-radius:14px}
+    .qr-dialog .qr-box img{display:block;width:224px;height:224px;max-width:100%}
+    .qr-link{color:#a9c9ff;font-size:13px;overflow-wrap:anywhere}
+    @media(max-width:450px){header{gap:8px}h1{font-size:23px}.sub{font-size:12px}.qr-trigger{padding:10px;font-size:13px}}
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
     .card{background:rgba(20,27,45,.95);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
     .card h2{margin:0 0 12px;font-size:20px}.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#1b2642;color:#d9e2ff;font-size:13px}
@@ -32,6 +39,7 @@
 <div class="wrap">
   <header>
     <div><h1>CrossFit Maseok</h1><div class="sub">나에게 맞는 운동 강도를 찾고, 기록하고, 조절하기</div></div>
+    <div class="header-actions"><button type="button" class="qr-trigger" id="showQrBtn" aria-haspopup="dialog" aria-controls="qrDialog">▦ QR보기</button></div>
   </header>
 
   <div class="grid">
@@ -94,6 +102,23 @@
 <button class="admin-btn" id="adminBtn">⚙ 관리자</button>
 <div class="toast" id="toast"></div>
 
+<dialog id="qrDialog" class="qr-dialog" aria-labelledby="qrDialogTitle">
+  <h2 id="qrDialogTitle" style="margin:0">CrossFit Maseok 접속 QR</h2>
+  <p class="sub" style="margin:9px 0">학생들에게 보여주고 휴대폰으로 스캔하게 하세요.</p>
+  <div class="qr-box">
+    <img
+      src="https://api.qrserver.com/v1/create-qr-code/?size=224x224&amp;margin=8&amp;data=https%3A%2F%2Fnamcheoli7-cloud.github.io%2FCROSSFIT2026%2F"
+      alt="CrossFit Maseok 웹앱 접속 QR코드"
+      width="224" height="224"
+    />
+  </div>
+  <a class="qr-link" href="https://namcheoli7-cloud.github.io/CROSSFIT2026/" target="_blank" rel="noopener noreferrer">namcheoli7-cloud.github.io/CROSSFIT2026/</a>
+  <div class="row" style="justify-content:center;margin-top:18px">
+    <button type="button" class="btn secondary" id="copyQrLinkBtn">주소 복사</button>
+    <button type="button" class="btn ghost" id="closeQrBtn">닫기</button>
+  </div>
+</dialog>
+
 <dialog id="passwordDialog">
   <h2>관리자 확인</h2>
   <div class="field"><label>비밀번호</label><input id="adminPassword" type="password" inputmode="numeric" placeholder="비밀번호 입력"></div>
@@ -115,6 +140,23 @@
   <div class="notice">보안 안내: 이 버전의 관리자 비밀번호는 브라우저에서 확인되는 단순 잠금장치입니다. 실제 보안을 원하면 Firebase Authentication + Realtime Database Rules를 적용해야 합니다.</div>
 </dialog>
 
+<script>
+  const crossfitUrl = 'https://namcheoli7-cloud.github.io/CROSSFIT2026/';
+  document.getElementById('showQrBtn').addEventListener('click', () => document.getElementById('qrDialog').showModal());
+  document.getElementById('closeQrBtn').addEventListener('click', () => document.getElementById('qrDialog').close());
+  document.getElementById('copyQrLinkBtn').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(crossfitUrl);
+      document.getElementById('copyQrLinkBtn').textContent = '복사 완료!';
+      setTimeout(() => document.getElementById('copyQrLinkBtn').textContent = '주소 복사', 1600);
+    } catch (e) {
+      window.prompt('주소를 복사하세요:', crossfitUrl);
+    }
+  });
+  document.getElementById('qrDialog').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.close();
+  });
+</script>
 <script type="module">
   // ===== Firebase 설정 =====
   const firebaseConfig = {
