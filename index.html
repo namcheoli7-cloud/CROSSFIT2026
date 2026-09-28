@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>CrossFit Class WOD</title>
+  <title>CrossFit Maseok</title>
   <style>
     :root{--bg:#0b1020;--card:#141b2d;--muted:#92a0bd;--text:#f7f9ff;--accent:#7ee787;--accent2:#6ea8fe;--danger:#ff6b6b;--line:#28334f;--shadow:0 12px 32px rgba(0,0,0,.25)}
     *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,sans-serif;background:linear-gradient(180deg,#0b1020,#0f1730);color:var(--text)}
@@ -11,7 +11,7 @@
     .wrap{max-width:1100px;margin:0 auto;padding:18px}
     header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
     h1{font-size:clamp(22px,4vw,34px);margin:0}.sub{color:var(--muted);font-size:14px}
-    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}@media(max-width:850px){.grid{grid-template-columns:1fr}}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
     .card{background:rgba(20,27,45,.95);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
     .card h2{margin:0 0 12px;font-size:20px}.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#1b2642;color:#d9e2ff;font-size:13px}
     .wod-title{font-size:28px;font-weight:800;margin:10px 0 4px}.wod-meta{color:var(--muted)}
@@ -31,8 +31,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div><h1>🏋️ CrossFit Class WOD</h1><div class="sub">나에게 맞는 운동 강도를 찾고, 기록하고, 조절하기</div></div>
-    <span class="pill" id="syncStatus">Firebase 연결 전</span>
+    <div><h1>CrossFit Maseok</h1><div class="sub">나에게 맞는 운동 강도를 찾고, 기록하고, 조절하기</div></div>
   </header>
 
   <div class="grid">
@@ -90,14 +89,6 @@
         <div id="leaderboard"></div>
       </div>
     </section>
-
-    <aside class="card">
-      <h2>오늘의 목표</h2>
-      <p style="line-height:1.7;color:#dbe4fb">기록 경쟁보다 <b>내 몸의 반응</b>을 확인하는 시간입니다. 심판은 정확한 개수를 세고, 선수는 자신의 운동강도와 어려웠던 동작을 기록합니다.</p>
-      <div class="move"><strong>운동 후 체크</strong><span class="target">RPE · 심박수 · 어려운 동작</span></div>
-      <div class="move"><strong>다음 차시 연결</strong><span class="target">개별성 · 과부하 · 점진성</span></div>
-      <div class="notice">※ 학생 개인정보 보호를 위해 가능하면 이름 대신 학번+이름 일부 또는 별칭 사용을 권장합니다.</div>
-    </aside>
   </div>
 </div>
 <button class="admin-btn" id="adminBtn">⚙ 관리자</button>
@@ -153,11 +144,9 @@
     try{
       const app=initializeApp(firebaseConfig);
       db=getDatabase(app);
-      els('syncStatus').textContent='Firebase 연결됨';
       listenData();
     }catch(e){
       console.error(e);
-      els('syncStatus').textContent='Firebase 연결 오류';
       loadFallback();
     }
   }
@@ -179,7 +168,7 @@
       if(!boardWodId || !wods.some(w=>w.id===boardWodId)) boardWodId=currentWod.id;
       renderWod(); renderWodSelects(); renderAdminWods(); renderLeaderboard();
     }, err => {
-      console.error(err); els('syncStatus').textContent='DB 읽기 권한 확인'; loadFallback();
+      console.error(err); loadFallback();
     });
 
     onValue(ref(db,'records'), snap => {
