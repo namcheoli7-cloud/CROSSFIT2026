@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>CrossFit Class WOD</title>
+  <style>
+    :root{--bg:#0b1020;--card:#141b2d;--muted:#92a0bd;--text:#f7f9ff;--accent:#7ee787;--accent2:#6ea8fe;--danger:#ff6b6b;--line:#28334f;--shadow:0 12px 32px rgba(0,0,0,.25)}
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,sans-serif;background:linear-gradient(180deg,#0b1020,#0f1730);color:var(--text)}
+    button,input,textarea,select{font:inherit} button{cursor:pointer}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+    h1{font-size:clamp(22px,4vw,34px);margin:0}.sub{color:var(--muted);font-size:14px}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}@media(max-width:850px){.grid{grid-template-columns:1fr}}
+    .card{background:rgba(20,27,45,.95);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+    .card h2{margin:0 0 12px;font-size:20px}.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#1b2642;color:#d9e2ff;font-size:13px}
+    .wod-title{font-size:28px;font-weight:800;margin:10px 0 4px}.wod-meta{color:var(--muted)}
+    .movements{display:grid;gap:10px;margin-top:14px}.move{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;background:#11182a;border:1px solid var(--line)}.move strong{font-size:17px}.target{color:#c9d4ef}
+    .tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}.tab{border:1px solid var(--line);background:#10182c;color:#c9d4ef;padding:10px 14px;border-radius:12px}.tab.active{background:var(--accent2);color:#07101f;border-color:transparent;font-weight:800}
+    .row{display:flex;gap:10px;flex-wrap:wrap}.field{flex:1;min-width:150px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;background:#0d1425;border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text)}
+    .timer{font-variant-numeric:tabular-nums;font-size:56px;font-weight:900;text-align:center;letter-spacing:1px;margin:8px 0}.timer-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:800}.btn.primary{background:var(--accent);color:#06220a}.btn.secondary{background:#243253;color:#eaf0ff}.btn.danger{background:var(--danger);color:#250808}.btn.ghost{background:transparent;color:#d8e2ff;border:1px solid var(--line)}
+    .judge-panel{text-align:center}.athlete{font-size:18px;font-weight:800;margin-top:14px}.big{font-size:46px;font-weight:900;margin:6px 0}.current-move{font-size:22px;font-weight:800}.rep{font-size:52px;font-weight:900}.counter-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.counter-actions button{padding:18px;border-radius:16px;border:0;font-size:20px;font-weight:900}.plus{background:var(--accent2);color:#07101f}.undo{background:#2a3553;color:#fff}.finish{margin-top:10px;width:100%;padding:14px}
+    .scoreline{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);gap:10px}.rank{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#1f2a48;font-weight:900}.score-main{flex:1}.score-main b{display:block}.score-main span{color:var(--muted);font-size:13px}.score{font-weight:900;font-size:19px}.empty{color:var(--muted);padding:16px 0}
+    .admin-btn{position:fixed;right:16px;bottom:16px;z-index:10;border:0;border-radius:999px;background:#222c47;color:#dce6ff;padding:12px 14px;box-shadow:var(--shadow)}
+    dialog{border:1px solid var(--line);border-radius:18px;background:#10172a;color:#fff;max-width:760px;width:calc(100% - 24px)}dialog::backdrop{background:rgba(0,0,0,.65)}
+    .admin-list{display:grid;gap:8px;margin-top:12px}.admin-item{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0c1324}.admin-item .row{align-items:center}.mini{font-size:12px;color:var(--muted)}
+    .notice{font-size:12px;color:#ffcf70;margin-top:10px;line-height:1.5}
+    .toast{position:fixed;left:50%;bottom:82px;transform:translateX(-50%);background:#050914;color:#fff;padding:10px 14px;border-radius:10px;border:1px solid var(--line);display:none;z-index:20}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1>🏋️ CrossFit Class WOD</h1><div class="sub">나에게 맞는 운동 강도를 찾고, 기록하고, 조절하기</div></div>
+    <span class="pill" id="syncStatus">Firebase 연결 전</span>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div class="pill" id="sessionBadge">오늘의 WOD</div>
+      <div class="wod-title" id="wodTitle">My Baseline</div>
+      <div class="wod-meta" id="wodDesc">AMRAP 10분 · 운동장</div>
+      <div class="movements" id="movementList"></div>
+      <div class="tabs">
+        <button class="tab active" data-tab="judge">심판 모드</button>
+        <button class="tab" data-tab="submit">기록 입력</button>
+        <button class="tab" data-tab="leaderboard">리더보드</button>
+      </div>
+
+      <div id="tab-judge">
+        <div class="row">
+          <div class="field"><label>운동하는 학생</label><input id="athleteName" placeholder="예: 2101 홍길동"></div>
+          <div class="field"><label>심판 학생</label><input id="judgeName" placeholder="예: 2102 김체육"></div>
+        </div>
+        <div class="judge-panel">
+          <div class="timer" id="timer">10:00</div>
+          <div class="timer-controls">
+            <button class="btn primary" id="startBtn">시작</button>
+            <button class="btn secondary" id="pauseBtn">일시정지</button>
+            <button class="btn ghost" id="resetBtn">초기화</button>
+          </div>
+          <div class="athlete" id="judgeAthlete">학생 이름을 입력하세요</div>
+          <div class="big"><span id="roundText">0</span> ROUND</div>
+          <div class="current-move" id="currentMove">100m 달리기</div>
+          <div class="rep"><span id="repText">0</span><span id="repTarget" style="font-size:22px;color:var(--muted)"> / 1</span></div>
+          <div class="counter-actions"><button class="plus" id="plusBtn">+ 1</button><button class="undo" id="undoBtn">↶ 되돌리기</button></div>
+          <button class="btn danger finish" id="finishBtn">운동 종료 → 기록 입력</button>
+        </div>
+      </div>
+
+      <div id="tab-submit" hidden>
+        <div class="row">
+          <div class="field"><label>운동 학생</label><input id="submitAthlete"></div>
+          <div class="field"><label>심판 학생</label><input id="submitJudge"></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="field"><label>완료 Round</label><input id="submitRounds" type="number" min="0" value="0"></div>
+          <div class="field"><label>추가 진행도(자동 계산 가능)</label><input id="submitExtra" type="number" min="0" value="0"></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="field"><label>RPE (1~10)</label><input id="submitRpe" type="number" min="1" max="10" placeholder="예: 8"></div>
+          <div class="field"><label>운동 직후 심박수</label><input id="submitHr" type="number" min="40" max="240" placeholder="선택"></div>
+        </div>
+        <div class="field" style="margin-top:10px"><label>한 줄 기록</label><textarea id="submitNote" rows="3" placeholder="가장 힘들었던 동작, 다음에 바꾸고 싶은 점 등"></textarea></div>
+        <button class="btn primary" id="saveRecordBtn" style="width:100%;margin-top:12px">리더보드에 기록 저장</button>
+      </div>
+
+      <div id="tab-leaderboard" hidden>
+        <div class="row" style="margin-bottom:10px"><div class="field"><label>회차 선택</label><select id="boardWodSelect"></select></div></div>
+        <div id="leaderboard"></div>
+      </div>
+    </section>
+
+    <aside class="card">
+      <h2>오늘의 목표</h2>
+      <p style="line-height:1.7;color:#dbe4fb">기록 경쟁보다 <b>내 몸의 반응</b>을 확인하는 시간입니다. 심판은 정확한 개수를 세고, 선수는 자신의 운동강도와 어려웠던 동작을 기록합니다.</p>
+      <div class="move"><strong>운동 후 체크</strong><span class="target">RPE · 심박수 · 어려운 동작</span></div>
+      <div class="move"><strong>다음 차시 연결</strong><span class="target">개별성 · 과부하 · 점진성</span></div>
+      <div class="notice">※ 학생 개인정보 보호를 위해 가능하면 이름 대신 학번+이름 일부 또는 별칭 사용을 권장합니다.</div>
+    </aside>
+  </div>
+</div>
+<button class="admin-btn" id="adminBtn">⚙ 관리자</button>
+<div class="toast" id="toast"></div>
+
+<dialog id="passwordDialog">
+  <h2>관리자 확인</h2>
+  <div class="field"><label>비밀번호</label><input id="adminPassword" type="password" inputmode="numeric" placeholder="비밀번호 입력"></div>
+  <div class="row" style="margin-top:12px"><button class="btn primary" id="adminLoginBtn">확인</button><button class="btn ghost" onclick="passwordDialog.close()">취소</button></div>
+</dialog>
+
+<dialog id="adminDialog">
+  <div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">관리자 설정</h2><button class="btn ghost" onclick="adminDialog.close()">닫기</button></div>
+  <div class="tabs"><button class="tab active" data-admin-tab="wods">WOD 관리</button><button class="tab" data-admin-tab="records">기록 관리</button></div>
+  <div id="admin-wods">
+    <div class="row"><div class="field"><label>회차 ID</label><input id="adminWodId" placeholder="예: 2026-09-28-1"></div><div class="field"><label>제목</label><input id="adminWodTitle"></div></div>
+    <div class="row" style="margin-top:8px"><div class="field"><label>설명</label><input id="adminWodDesc"></div><div class="field"><label>제한시간(분)</label><input id="adminWodMinutes" type="number" min="1" value="10"></div></div>
+    <div class="field" style="margin-top:8px"><label>동작 입력 (한 줄에 하나, 형식: 동작명|목표횟수)</label><textarea id="adminMovements" rows="6" placeholder="100m 달리기|1\n스쿼트|10\n푸시업|5\n싯업|10"></textarea></div>
+    <label class="mini"><input type="checkbox" id="adminActive"> 이 WOD를 현재 회차로 사용</label>
+    <button class="btn primary" id="saveWodBtn" style="width:100%;margin-top:10px">WOD 저장 / 수정</button>
+    <div class="admin-list" id="adminWodList"></div>
+  </div>
+  <div id="admin-records" hidden><div class="admin-list" id="adminRecordList"></div></div>
+  <div class="notice">보안 안내: 이 버전의 관리자 비밀번호는 브라우저에서 확인되는 단순 잠금장치입니다. 실제 보안을 원하면 Firebase Authentication + Realtime Database Rules를 적용해야 합니다.</div>
+</dialog>
+
+<script type="module">
+  // ===== Firebase 설정 =====
+  const firebaseConfig = {
+    apiKey: "AIzaSyB8_ABUYRet6Qb1jlcjYGPYRSXJ4MCnRc4",
+    authDomain: "dodgeball-efbff.firebaseapp.com",
+    databaseURL: "https://dodgeball-efbff-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "dodgeball-efbff",
+    storageBucket: "dodgeball-efbff.firebasestorage.app",
+    messagingSenderId: "375748754364",
+    appId: "1:375748754364:web:2a49b5137784a68c6f89b9"
+  };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getDatabase, ref, onValue, set, push, update, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+  const els = id => document.getElementById(id);
+  const toast = msg => { const t=els('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1800); };
+  let db = null;
+  let wods = [], currentWod = null, records = [], boardWodId = null;
+  let timerSec = 600, timerInt = null, running = false;
+  let rounds = 0, moveIndex = 0, rep = 0, history = [];
+
+  const fallbackWod = { id:'baseline-1', title:'My Baseline', desc:'AMRAP 10분 · 운동장', minutes:10, active:true,
+    movements:[{name:'100m 달리기',target:1},{name:'스쿼트',target:10},{name:'푸시업',target:5},{name:'싯업',target:10}] };
+
+  function initFirebase(){
+    try{
+      const app=initializeApp(firebaseConfig);
+      db=getDatabase(app);
+      els('syncStatus').textContent='Firebase 연결됨';
+      listenData();
+    }catch(e){
+      console.error(e);
+      els('syncStatus').textContent='Firebase 연결 오류';
+      loadFallback();
+    }
+  }
+
+  function loadFallback(){
+    wods=[fallbackWod]; currentWod=fallbackWod; boardWodId=currentWod.id;
+    renderWod(); renderWodSelects(); renderLeaderboard(); renderAdminWods(); renderAdminRecords();
+  }
+
+  function listenData(){
+    onValue(ref(db,'wods'), snap => {
+      const data=snap.val() || {};
+      wods=Object.entries(data).map(([id,v])=>({id,...v}));
+      if(!wods.length){
+        set(ref(db,'wods/'+fallbackWod.id), {...fallbackWod, id:undefined}).catch(console.error);
+        wods=[fallbackWod];
+      }
+      currentWod=wods.find(w=>w.active) || wods[0] || fallbackWod;
+      if(!boardWodId || !wods.some(w=>w.id===boardWodId)) boardWodId=currentWod.id;
+      renderWod(); renderWodSelects(); renderAdminWods(); renderLeaderboard();
+    }, err => {
+      console.error(err); els('syncStatus').textContent='DB 읽기 권한 확인'; loadFallback();
+    });
+
+    onValue(ref(db,'records'), snap => {
+      const data=snap.val() || {};
+      records=Object.entries(data).map(([id,v])=>({id,...v}));
+      renderLeaderboard(); renderAdminRecords();
+    }, err => console.error(err));
+  }
+
+  function renderWod(){
+    if(!currentWod) return;
+    els('wodTitle').textContent=currentWod.title||'WOD';
+    els('wodDesc').textContent=currentWod.desc||'';
+    els('sessionBadge').textContent=`현재 회차 · ${currentWod.id}`;
+    els('movementList').innerHTML=(currentWod.movements||[]).map(m=>`<div class="move"><strong>${escapeHtml(m.name)}</strong><span class="target">${m.target}회</span></div>`).join('');
+    timerSec=(currentWod.minutes||10)*60; resetJudge(false); updateTimer(); updateJudgeUI();
+  }
+
+  function resetJudge(clearNames=true){
+    clearInterval(timerInt); timerInt=null; running=false; rounds=0; moveIndex=0; rep=0; history=[];
+    timerSec=(currentWod?.minutes||10)*60;
+    if(clearNames){els('athleteName').value='';els('judgeName').value='';}
+    updateTimer();updateJudgeUI();
+  }
+  function updateTimer(){ const m=Math.floor(timerSec/60),s=timerSec%60; els('timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+  function startTimer(){ if(running) return; running=true; timerInt=setInterval(()=>{ if(timerSec>0){timerSec--;updateTimer();} else {clearInterval(timerInt);running=false;toast('시간 종료! 기록을 저장하세요.'); if(navigator.vibrate) navigator.vibrate([250,120,250]);}},1000); }
+  function pauseTimer(){clearInterval(timerInt);timerInt=null;running=false;}
+
+  function updateJudgeUI(){
+    const m=currentWod?.movements?.[moveIndex] || {name:'-',target:0};
+    els('roundText').textContent=rounds; els('currentMove').textContent=m.name; els('repText').textContent=rep; els('repTarget').textContent=` / ${m.target}`;
+    els('judgeAthlete').textContent=els('athleteName').value.trim() || '학생 이름을 입력하세요';
+  }
+  els('athleteName').addEventListener('input',updateJudgeUI);
+  function plusOne(){
+    if(!currentWod?.movements?.length) return;
+    const m=currentWod.movements[moveIndex]; history.push({rounds,moveIndex,rep}); rep++;
+    if(navigator.vibrate) navigator.vibrate(25);
+    if(rep>=m.target){rep=0; moveIndex++; if(moveIndex>=currentWod.movements.length){moveIndex=0;rounds++; toast(`${rounds} Round 완료!`); if(navigator.vibrate) navigator.vibrate([70,50,70]);}}
+    updateJudgeUI();
+  }
+  function undo(){ const prev=history.pop(); if(!prev) return; ({rounds,moveIndex,rep}=prev); updateJudgeUI(); }
+  function extraProgress(){ let total=0; for(let i=0;i<moveIndex;i++) total += Number(currentWod.movements[i].target||0); return total+rep; }
+  function roundSize(wod=currentWod){return (wod?.movements||[]).reduce((a,m)=>a+Number(m.target||0),0)}
+  function scoreValue(r,e,wod=currentWod){return Number(r||0)*roundSize(wod)+Number(e||0)}
+  function scoreText(r,e){return `${r}R + ${e}`}
+
+  function goSubmit(){
+    pauseTimer();
+    els('submitAthlete').value=els('athleteName').value; els('submitJudge').value=els('judgeName').value;
+    els('submitRounds').value=rounds; els('submitExtra').value=extraProgress(); switchTab('submit');
+  }
+
+  async function saveRecord(){
+    const athlete=els('submitAthlete').value.trim(), judge=els('submitJudge').value.trim();
+    if(!athlete){toast('운동 학생 이름을 입력하세요.');return;}
+    const data={wodId:currentWod.id,athlete,judge,rounds:Number(els('submitRounds').value||0),extra:Number(els('submitExtra').value||0),rpe:Number(els('submitRpe').value||0)||null,hr:Number(els('submitHr').value||0)||null,note:els('submitNote').value.trim(),createdAt:serverTimestamp()};
+    try{
+      if(!db){ records.push({id:String(Date.now()),...data,createdAt:Date.now()}); renderLeaderboard();toast('로컬 화면에만 저장됨');return; }
+      await push(ref(db,'records'),data); toast('기록 저장 완료'); boardWodId=currentWod.id; renderWodSelects(); switchTab('leaderboard');
+    }catch(e){ console.error(e); toast('저장 실패 · DB 규칙 확인'); }
+  }
+
+  function renderLeaderboard(){
+    const selectedWod=wods.find(w=>w.id===boardWodId) || currentWod || fallbackWod;
+    const list=records.filter(r=>r.wodId===selectedWod.id).sort((a,b)=>scoreValue(b.rounds,b.extra,selectedWod)-scoreValue(a.rounds,a.extra,selectedWod));
+    els('leaderboard').innerHTML=list.length?list.map((r,i)=>`<div class="scoreline"><div class="rank">${i+1}</div><div class="score-main"><b>${escapeHtml(r.athlete)}</b><span>심판 ${escapeHtml(r.judge||'-')} · RPE ${r.rpe??'-'} · HR ${r.hr??'-'}</span></div><div class="score">${scoreText(r.rounds,r.extra)}</div></div>`).join(''):`<div class="empty">아직 저장된 기록이 없습니다.</div>`;
+  }
+
+  function renderWodSelects(){
+    const list=wods.length?wods:[fallbackWod];
+    els('boardWodSelect').innerHTML=list.map(w=>`<option value="${escapeHtml(w.id)}" ${w.id===boardWodId?'selected':''}>${escapeHtml(w.title)} (${escapeHtml(w.id)})</option>`).join('');
+  }
+  els('boardWodSelect').addEventListener('change',e=>{ boardWodId=e.target.value; renderLeaderboard(); });
+
+  document.querySelectorAll('.tab[data-tab]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+  function switchTab(name){ document.querySelectorAll('.tab[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name)); ['judge','submit','leaderboard'].forEach(x=>els('tab-'+x).hidden=x!==name); }
+  document.querySelectorAll('.tab[data-admin-tab]').forEach(b=>b.addEventListener('click',()=>{const n=b.dataset.adminTab;document.querySelectorAll('.tab[data-admin-tab]').forEach(x=>x.classList.toggle('active',x.dataset.adminTab===n));els('admin-wods').hidden=n!=='wods';els('admin-records').hidden=n!=='records';}));
+
+  els('startBtn').onclick=startTimer; els('pauseBtn').onclick=pauseTimer; els('resetBtn').onclick=()=>resetJudge(false); els('plusBtn').onclick=plusOne; els('undoBtn').onclick=undo; els('finishBtn').onclick=goSubmit; els('saveRecordBtn').onclick=saveRecord;
+
+  els('adminBtn').onclick=()=>{els('adminPassword').value='';passwordDialog.showModal();setTimeout(()=>els('adminPassword').focus(),50)};
+  els('adminLoginBtn').onclick=()=>{ if(els('adminPassword').value==='2456'){passwordDialog.close();adminDialog.showModal();fillAdminForm(currentWod);} else toast('비밀번호가 올바르지 않습니다.'); };
+  els('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter')els('adminLoginBtn').click()});
+
+  function fillAdminForm(w){
+    if(!w)return; els('adminWodId').value=w.id;els('adminWodTitle').value=w.title||'';els('adminWodDesc').value=w.desc||'';els('adminWodMinutes').value=w.minutes||10;els('adminMovements').value=(w.movements||[]).map(m=>`${m.name}|${m.target}`).join('\n');els('adminActive').checked=!!w.active;
+  }
+  function parseMovements(){return els('adminMovements').value.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{const [name,target]=line.split('|');return {name:(name||'').trim(),target:Math.max(1,Number(target||1))}}).filter(m=>m.name)}
+  els('saveWodBtn').onclick=async()=>{
+    const id=els('adminWodId').value.trim(); if(!id){toast('회차 ID를 입력하세요.');return;}
+    const data={title:els('adminWodTitle').value.trim(),desc:els('adminWodDesc').value.trim(),minutes:Math.max(1,Number(els('adminWodMinutes').value||10)),movements:parseMovements(),active:els('adminActive').checked,updatedAt:serverTimestamp()};
+    try{
+      if(!db){ const idx=wods.findIndex(w=>w.id===id); if(data.active)wods.forEach(w=>w.active=false); if(idx>=0)wods[idx]={id,...data};else wods.push({id,...data}); currentWod=wods.find(w=>w.active)||wods[0];renderWod();renderWodSelects();renderAdminWods();toast('로컬 화면에서 수정됨');return; }
+      if(data.active){
+        const changes={}; wods.filter(w=>w.id!==id && w.active).forEach(w=>changes[`wods/${w.id}/active`]=false);
+        if(Object.keys(changes).length) await update(ref(db),changes);
+      }
+      await set(ref(db,'wods/'+id),data); toast('WOD 저장 완료');
+    }catch(e){ console.error(e); toast('WOD 저장 실패 · DB 규칙 확인'); }
+  };
+
+  function renderAdminWods(){
+    els('adminWodList').innerHTML=wods.map(w=>`<div class="admin-item"><div class="row"><div style="flex:1"><b>${escapeHtml(w.title)}</b><div class="mini">${escapeHtml(w.id)} · ${w.minutes||10}분 ${w.active?'· 현재 회차':''}</div></div><button class="btn secondary" data-edit-wod="${escapeHtml(w.id)}">수정</button><button class="btn danger" data-del-wod="${escapeHtml(w.id)}">삭제</button></div></div>`).join('');
+    document.querySelectorAll('[data-edit-wod]').forEach(b=>b.onclick=()=>fillAdminForm(wods.find(w=>w.id===b.dataset.editWod)));
+    document.querySelectorAll('[data-del-wod]').forEach(b=>b.onclick=()=>deleteWod(b.dataset.delWod));
+  }
+  async function deleteWod(id){
+    if(!confirm('이 WOD를 삭제할까요?'))return;
+    try{ if(db)await remove(ref(db,'wods/'+id)); else {wods=wods.filter(w=>w.id!==id);currentWod=wods.find(w=>w.active)||wods[0]||fallbackWod;renderWod();renderAdminWods();} }
+    catch(e){console.error(e);toast('삭제 실패');}
+  }
+
+  function currentAdminRecords(){ return records.filter(r=>r.wodId===currentWod?.id); }
+  function renderAdminRecords(){
+    const list=currentAdminRecords();
+    els('adminRecordList').innerHTML=list.length?list.map(r=>`<div class="admin-item"><div class="row"><div style="flex:1"><b>${escapeHtml(r.athlete)}</b><div class="mini">${scoreText(r.rounds,r.extra)} · 심판 ${escapeHtml(r.judge||'-')} · RPE ${r.rpe??'-'} · HR ${r.hr??'-'}</div></div><button class="btn secondary" data-edit-rec="${r.id}">수정</button><button class="btn danger" data-del-rec="${r.id}">삭제</button></div></div>`).join(''):'<div class="empty">기록 없음</div>';
+    document.querySelectorAll('[data-edit-rec]').forEach(b=>b.onclick=()=>editRecord(b.dataset.editRec)); document.querySelectorAll('[data-del-rec]').forEach(b=>b.onclick=()=>deleteRecord(b.dataset.delRec));
+  }
+  async function editRecord(id){
+    const r=records.find(x=>x.id===id); if(!r)return;
+    const athlete=prompt('학생 이름',r.athlete); if(athlete===null)return;
+    const judge=prompt('심판 이름',r.judge||''); if(judge===null)return;
+    const roundsNew=Number(prompt('Round',r.rounds)); const extraNew=Number(prompt('추가 진행도',r.extra)); const rpeNew=prompt('RPE',r.rpe??''); const hrNew=prompt('심박수',r.hr??''); const noteNew=prompt('한 줄 기록',r.note||'');
+    const patch={athlete:athlete.trim(),judge:judge.trim(),rounds:Math.max(0,roundsNew||0),extra:Math.max(0,extraNew||0),rpe:rpeNew?Number(rpeNew):null,hr:hrNew?Number(hrNew):null,note:noteNew??'',updatedAt:serverTimestamp()};
+    try{ if(db)await update(ref(db,'records/'+id),patch); else {Object.assign(r,patch);renderLeaderboard();renderAdminRecords();} }
+    catch(e){console.error(e);toast('기록 수정 실패');}
+  }
+  async function deleteRecord(id){
+    if(!confirm('이 기록을 삭제할까요?'))return;
+    try{ if(db)await remove(ref(db,'records/'+id)); else {records=records.filter(r=>r.id!==id);renderLeaderboard();renderAdminRecords();} }
+    catch(e){console.error(e);toast('기록 삭제 실패');}
+  }
+
+  function escapeHtml(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+
+  initFirebase();
+</script>
+</body>
+</html>
