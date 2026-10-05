@@ -28,6 +28,9 @@
     .timer{font-variant-numeric:tabular-nums;font-size:56px;font-weight:900;text-align:center;letter-spacing:1px;margin:8px 0}.timer-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:800}.btn.primary{background:var(--accent);color:#06220a}.btn.secondary{background:#243253;color:#eaf0ff}.btn.danger{background:var(--danger);color:#250808}.btn.ghost{background:transparent;color:#d8e2ff;border:1px solid var(--line)}
     .judge-panel{text-align:center}.athlete{font-size:18px;font-weight:800;margin-top:14px}.big{font-size:46px;font-weight:900;margin:6px 0}.current-move{font-size:22px;font-weight:800}.rep{font-size:52px;font-weight:900}.counter-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.counter-actions button{padding:18px;border-radius:16px;border:0;font-size:20px;font-weight:900}.plus{background:var(--accent2);color:#07101f}.undo{background:#2a3553;color:#fff}.finish{margin-top:10px;width:100%;padding:14px}
     .scoreline{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);gap:10px}.rank{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#1f2a48;font-weight:900}.score-main{flex:1}.score-main b{display:block}.score-main span{color:var(--muted);font-size:13px}.score{font-weight:900;font-size:19px}.empty{color:var(--muted);padding:16px 0}
+    .scale-guide{margin:14px 0 12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:#0d1425}.scale-title{font-weight:900;margin-bottom:4px}.scale-help{font-size:12px;color:var(--muted);line-height:1.45}
+    .scale-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.scale-btn{border:1px solid var(--line);border-radius:14px;background:#121b31;color:#eaf0ff;padding:12px 8px;text-align:center;transition:.15s}.scale-btn strong{display:block;font-size:20px}.scale-btn span{display:block;font-size:11px;color:var(--muted);margin-top:3px}.scale-btn.active{background:var(--accent2);color:#07101f;border-color:transparent;transform:translateY(-1px)}.scale-btn.active span{color:#183358}.scale-badge{display:inline-grid;place-items:center;min-width:30px;height:26px;padding:0 8px;border-radius:999px;background:#243253;color:#eaf0ff;font-weight:900;font-size:12px}.scale-badge.a{background:#ffcf70;color:#3a2500}.scale-badge.b{background:#6ea8fe;color:#07101f}.scale-badge.c{background:#7ee787;color:#06220a}.move .target{display:flex;align-items:center;gap:8px}.judge-scale{margin:10px auto 2px;width:max-content}.leader-group{margin-top:14px}.leader-group-title{display:flex;align-items:center;gap:8px;padding:8px 0 4px;font-weight:900}.leader-group .scoreline:last-child{border-bottom:0}
+    @media(max-width:520px){.scale-picker{grid-template-columns:1fr}.scale-btn{display:flex;align-items:center;justify-content:space-between;text-align:left;padding:11px 14px}.scale-btn strong{font-size:17px}.scale-btn span{margin:0}}
     .admin-btn{position:fixed;right:16px;bottom:16px;z-index:10;border:0;border-radius:999px;background:#222c47;color:#dce6ff;padding:12px 14px;box-shadow:var(--shadow)}
     dialog{border:1px solid var(--line);border-radius:18px;background:#10172a;color:#fff;max-width:760px;width:calc(100% - 24px)}dialog::backdrop{background:rgba(0,0,0,.65)}
     .admin-list{display:grid;gap:8px;margin-top:12px}.admin-item{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0c1324}.admin-item .row{align-items:center}.mini{font-size:12px;color:var(--muted)}
@@ -48,6 +51,15 @@
       <div class="wod-title" id="wodTitle">My Baseline</div>
       <div class="wod-meta" id="wodDesc">AMRAP 10분 · 운동장</div>
       <div class="movements" id="movementList"></div>
+      <div class="scale-guide">
+        <div class="scale-title">내 스케일 선택</div>
+        <div class="scale-help">등급이 아닙니다. 9분 동안 동작 기준을 지키며 꾸준히 수행할 수 있는 수준을 선택하세요.</div>
+        <div class="scale-picker" id="scalePicker">
+          <button type="button" class="scale-btn" data-scale="A"><strong>A SCALE</strong><span>도전 · 운동량 많음</span></button>
+          <button type="button" class="scale-btn active" data-scale="B"><strong>B SCALE</strong><span>기본 · 권장 시작점</span></button>
+          <button type="button" class="scale-btn" data-scale="C"><strong>C SCALE</strong><span>조절 · 운동량 적음</span></button>
+        </div>
+      </div>
       <div class="tabs">
         <button class="tab active" data-tab="judge">심판 모드</button>
         <button class="tab" data-tab="submit">기록 입력</button>
@@ -67,6 +79,7 @@
             <button class="btn ghost" id="resetBtn">초기화</button>
           </div>
           <div class="athlete" id="judgeAthlete">학생 이름을 입력하세요</div>
+          <div class="judge-scale"><span class="scale-badge b" id="judgeScaleBadge">B SCALE</span></div>
           <div class="big"><span id="roundText">0</span> ROUND</div>
           <div class="current-move" id="currentMove">100m 달리기</div>
           <div class="rep"><span id="repText">0</span><span id="repTarget" style="font-size:22px;color:var(--muted)"> / 1</span></div>
@@ -79,6 +92,7 @@
         <div class="row">
           <div class="field"><label>운동 학생</label><input id="submitAthlete"></div>
           <div class="field"><label>심판 학생</label><input id="submitJudge"></div>
+          <div class="field"><label>선택 스케일</label><input id="submitScale" value="B" readonly></div>
         </div>
         <div class="row" style="margin-top:10px">
           <div class="field"><label>완료 Round</label><input id="submitRounds" type="number" min="0" value="0"></div>
@@ -131,8 +145,9 @@
   <div id="admin-wods">
     <div class="row"><div class="field"><label>회차 ID</label><input id="adminWodId" placeholder="예: 2026-09-28-1"></div><div class="field"><label>제목</label><input id="adminWodTitle"></div></div>
     <div class="row" style="margin-top:8px"><div class="field"><label>설명</label><input id="adminWodDesc"></div><div class="field"><label>제한시간(분)</label><input id="adminWodMinutes" type="number" min="1" value="10"></div></div>
-    <div class="field" style="margin-top:8px"><label>동작 입력 (한 줄에 하나, 형식: 동작명|목표횟수)</label><textarea id="adminMovements" rows="6" placeholder="100m 달리기|1\n스쿼트|10\n푸시업|5\n싯업|10"></textarea></div>
-    <label class="mini"><input type="checkbox" id="adminActive"> 이 WOD를 현재 회차로 사용</label>
+    <div class="field" style="margin-top:8px"><label>동작 입력 (동작명|A횟수|B횟수|C횟수)</label><textarea id="adminMovements" rows="7" placeholder="100m 달리기|1|1|1\n버피 브로드 점프|8|6|4\n핸드 릴리즈 푸시업|10|8|5\n싯업|15|12|8\n리버스 런지|20|16|10"></textarea><div class="mini" style="margin-top:5px">기존처럼 동작명|횟수만 입력하면 A·B·C가 모두 같은 횟수로 저장됩니다.</div></div>
+    <button type="button" class="btn secondary" id="loadScalePresetBtn" style="width:100%;margin-top:8px">이번 SCHOOL HYROX 스케일 WOD 불러오기</button>
+    <label class="mini" style="display:block;margin-top:9px"><input type="checkbox" id="adminActive"> 이 WOD를 현재 회차로 사용</label>
     <button class="btn primary" id="saveWodBtn" style="width:100%;margin-top:10px">WOD 저장 / 수정</button>
     <div class="admin-list" id="adminWodList"></div>
   </div>
@@ -178,9 +193,16 @@
   let wods = [], currentWod = null, records = [], boardWodId = null;
   let timerSec = 600, timerInt = null, running = false;
   let rounds = 0, moveIndex = 0, rep = 0, history = [];
+  let selectedScale = 'B';
 
-  const fallbackWod = { id:'baseline-1', title:'My Baseline', desc:'AMRAP 10분 · 운동장', minutes:10, active:true,
-    movements:[{name:'100m 달리기',target:1},{name:'스쿼트',target:10},{name:'푸시업',target:5},{name:'싯업',target:10}] };
+  const fallbackWod = { id:'school-hyrox-scale', title:'SCHOOL HYROX · SCALE', desc:'AMRAP 9분 · 나에게 맞는 스케일 선택', minutes:9, active:true,
+    movements:[
+      {name:'100m 달리기',targetA:1,targetB:1,targetC:1},
+      {name:'버피 브로드 점프',targetA:8,targetB:6,targetC:4},
+      {name:'핸드 릴리즈 푸시업',targetA:10,targetB:8,targetC:5},
+      {name:'싯업',targetA:15,targetB:12,targetC:8},
+      {name:'리버스 런지',targetA:20,targetB:16,targetC:10}
+    ] };
 
   function initFirebase(){
     try{
@@ -220,14 +242,40 @@
     }, err => console.error(err));
   }
 
+  function targetFor(m, scale=selectedScale){
+    const key='target'+scale;
+    const raw=m?.[key] ?? m?.target ?? m?.targetB ?? m?.targetA ?? m?.targetC ?? 0;
+    return Math.max(0, Number(raw||0));
+  }
+  function scaleClass(scale){ return String(scale||'').toLowerCase(); }
+  function renderScalePicker(){
+    document.querySelectorAll('[data-scale]').forEach(b=>b.classList.toggle('active',b.dataset.scale===selectedScale));
+    const badge=els('judgeScaleBadge');
+    if(badge){ badge.textContent=`${selectedScale} SCALE`; badge.className=`scale-badge ${scaleClass(selectedScale)}`; }
+  }
+  function selectScale(scale){
+    if(!['A','B','C'].includes(scale)) return;
+    const hasProgress=running || rounds>0 || moveIndex>0 || rep>0;
+    if(hasProgress && !confirm('스케일을 바꾸면 현재 카운트가 초기화됩니다. 변경할까요?')){ renderScalePicker(); return; }
+    if(hasProgress) resetJudge(false);
+    selectedScale=scale;
+    if(els('submitScale')) els('submitScale').value=selectedScale;
+    renderScalePicker(); renderMovementList(); updateJudgeUI();
+    toast(`${scale} SCALE 선택`);
+  }
+  function renderMovementList(){
+    if(!currentWod) return;
+    els('movementList').innerHTML=(currentWod.movements||[]).map(m=>`<div class="move"><strong>${escapeHtml(m.name)}</strong><span class="target"><span class="scale-badge ${scaleClass(selectedScale)}">${selectedScale}</span><b>${targetFor(m)}회</b></span></div>`).join('');
+  }
   function renderWod(){
     if(!currentWod) return;
     els('wodTitle').textContent=currentWod.title||'WOD';
     els('wodDesc').textContent=currentWod.desc||'';
     els('sessionBadge').textContent=`현재 회차 · ${currentWod.id}`;
-    els('movementList').innerHTML=(currentWod.movements||[]).map(m=>`<div class="move"><strong>${escapeHtml(m.name)}</strong><span class="target">${m.target}회</span></div>`).join('');
+    renderMovementList(); renderScalePicker();
     timerSec=(currentWod.minutes||10)*60; resetJudge(false); updateTimer(); updateJudgeUI();
   }
+  document.querySelectorAll('[data-scale]').forEach(b=>b.addEventListener('click',()=>selectScale(b.dataset.scale)));
 
   function resetJudge(clearNames=true){
     clearInterval(timerInt); timerInt=null; running=false; rounds=0; moveIndex=0; rep=0; history=[];
@@ -241,33 +289,34 @@
 
   function updateJudgeUI(){
     const m=currentWod?.movements?.[moveIndex] || {name:'-',target:0};
-    els('roundText').textContent=rounds; els('currentMove').textContent=m.name; els('repText').textContent=rep; els('repTarget').textContent=` / ${m.target}`;
+    els('roundText').textContent=rounds; els('currentMove').textContent=m.name; els('repText').textContent=rep; els('repTarget').textContent=` / ${targetFor(m)}`;
     els('judgeAthlete').textContent=els('athleteName').value.trim() || '학생 이름을 입력하세요';
+    renderScalePicker();
   }
   els('athleteName').addEventListener('input',updateJudgeUI);
   function plusOne(){
     if(!currentWod?.movements?.length) return;
     const m=currentWod.movements[moveIndex]; history.push({rounds,moveIndex,rep}); rep++;
     if(navigator.vibrate) navigator.vibrate(25);
-    if(rep>=m.target){rep=0; moveIndex++; if(moveIndex>=currentWod.movements.length){moveIndex=0;rounds++; toast(`${rounds} Round 완료!`); if(navigator.vibrate) navigator.vibrate([70,50,70]);}}
+    if(rep>=targetFor(m)){rep=0; moveIndex++; if(moveIndex>=currentWod.movements.length){moveIndex=0;rounds++; toast(`${rounds} Round 완료!`); if(navigator.vibrate) navigator.vibrate([70,50,70]);}}
     updateJudgeUI();
   }
   function undo(){ const prev=history.pop(); if(!prev) return; ({rounds,moveIndex,rep}=prev); updateJudgeUI(); }
-  function extraProgress(){ let total=0; for(let i=0;i<moveIndex;i++) total += Number(currentWod.movements[i].target||0); return total+rep; }
-  function roundSize(wod=currentWod){return (wod?.movements||[]).reduce((a,m)=>a+Number(m.target||0),0)}
-  function scoreValue(r,e,wod=currentWod){return Number(r||0)*roundSize(wod)+Number(e||0)}
+  function extraProgress(){ let total=0; for(let i=0;i<moveIndex;i++) total += targetFor(currentWod.movements[i]); return total+rep; }
+  function roundSize(wod=currentWod,scale=selectedScale){return (wod?.movements||[]).reduce((a,m)=>a+targetFor(m,scale),0)}
+  function scoreValue(r,e,wod=currentWod,scale=selectedScale){return Number(r||0)*roundSize(wod,scale)+Number(e||0)}
   function scoreText(r,e){return `${r}R + ${e}`}
 
   function goSubmit(){
     pauseTimer();
-    els('submitAthlete').value=els('athleteName').value; els('submitJudge').value=els('judgeName').value;
+    els('submitAthlete').value=els('athleteName').value; els('submitJudge').value=els('judgeName').value; els('submitScale').value=selectedScale;
     els('submitRounds').value=rounds; els('submitExtra').value=extraProgress(); switchTab('submit');
   }
 
   async function saveRecord(){
     const athlete=els('submitAthlete').value.trim(), judge=els('submitJudge').value.trim();
     if(!athlete){toast('운동 학생 이름을 입력하세요.');return;}
-    const data={wodId:currentWod.id,athlete,judge,rounds:Number(els('submitRounds').value||0),extra:Number(els('submitExtra').value||0),rpe:Number(els('submitRpe').value||0)||null,hr:Number(els('submitHr').value||0)||null,note:els('submitNote').value.trim(),createdAt:serverTimestamp()};
+    const data={wodId:currentWod.id,athlete,judge,scale:selectedScale,rounds:Number(els('submitRounds').value||0),extra:Number(els('submitExtra').value||0),rpe:Number(els('submitRpe').value||0)||null,hr:Number(els('submitHr').value||0)||null,note:els('submitNote').value.trim(),createdAt:serverTimestamp()};
     try{
       if(!db){ records.push({id:String(Date.now()),...data,createdAt:Date.now()}); renderLeaderboard();toast('로컬 화면에만 저장됨');return; }
       await push(ref(db,'records'),data); toast('기록 저장 완료'); boardWodId=currentWod.id; renderWodSelects(); switchTab('leaderboard');
@@ -276,8 +325,17 @@
 
   function renderLeaderboard(){
     const selectedWod=wods.find(w=>w.id===boardWodId) || currentWod || fallbackWod;
-    const list=records.filter(r=>r.wodId===selectedWod.id).sort((a,b)=>scoreValue(b.rounds,b.extra,selectedWod)-scoreValue(a.rounds,a.extra,selectedWod));
-    els('leaderboard').innerHTML=list.length?list.map((r,i)=>`<div class="scoreline"><div class="rank">${i+1}</div><div class="score-main"><b>${escapeHtml(r.athlete)}</b><span>심판 ${escapeHtml(r.judge||'-')} · RPE ${r.rpe??'-'} · HR ${r.hr??'-'}</span></div><div class="score">${scoreText(r.rounds,r.extra)}</div></div>`).join(''):`<div class="empty">아직 저장된 기록이 없습니다.</div>`;
+    const wodRecords=records.filter(r=>r.wodId===selectedWod.id);
+    if(!wodRecords.length){ els('leaderboard').innerHTML='<div class="empty">아직 저장된 기록이 없습니다.</div>'; return; }
+    const groups=[['A','A SCALE'],['B','B SCALE'],['C','C SCALE'],['','미분류']];
+    const sections=groups.map(([scale,label])=>{
+      const list=wodRecords.filter(r=>(r.scale||'')===scale).sort((a,b)=>scoreValue(b.rounds,b.extra,selectedWod,scale||'B')-scoreValue(a.rounds,a.extra,selectedWod,scale||'B'));
+      if(!list.length) return '';
+      const rows=list.map((r,i)=>`<div class="scoreline"><div class="rank">${i+1}</div><div class="score-main"><b>${escapeHtml(r.athlete)}</b><span>심판 ${escapeHtml(r.judge||'-')} · RPE ${r.rpe??'-'} · HR ${r.hr??'-'}</span></div><div class="score">${scoreText(r.rounds,r.extra)}</div></div>`).join('');
+      const badge=scale?`<span class="scale-badge ${scaleClass(scale)}">${scale}</span>`:'<span class="scale-badge">?</span>';
+      return `<div class="leader-group"><div class="leader-group-title">${badge}<span>${label}</span></div>${rows}</div>`;
+    }).join('');
+    els('leaderboard').innerHTML=sections;
   }
 
   function renderWodSelects(){
@@ -297,9 +355,28 @@
   els('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter')els('adminLoginBtn').click()});
 
   function fillAdminForm(w){
-    if(!w)return; els('adminWodId').value=w.id;els('adminWodTitle').value=w.title||'';els('adminWodDesc').value=w.desc||'';els('adminWodMinutes').value=w.minutes||10;els('adminMovements').value=(w.movements||[]).map(m=>`${m.name}|${m.target}`).join('\n');els('adminActive').checked=!!w.active;
+    if(!w)return;
+    els('adminWodId').value=w.id;els('adminWodTitle').value=w.title||'';els('adminWodDesc').value=w.desc||'';els('adminWodMinutes').value=w.minutes||10;
+    els('adminMovements').value=(w.movements||[]).map(m=>`${m.name}|${targetFor(m,'A')}|${targetFor(m,'B')}|${targetFor(m,'C')}`).join('\n');
+    els('adminActive').checked=!!w.active;
   }
-  function parseMovements(){return els('adminMovements').value.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{const [name,target]=line.split('|');return {name:(name||'').trim(),target:Math.max(1,Number(target||1))}}).filter(m=>m.name)}
+  function parseMovements(){
+    return els('adminMovements').value.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{
+      const parts=line.split('|').map(x=>x.trim()); const name=parts[0]||'';
+      if(parts.length===2){ const t=Math.max(1,Number(parts[1]||1)); return {name,targetA:t,targetB:t,targetC:t}; }
+      return {name,targetA:Math.max(1,Number(parts[1]||1)),targetB:Math.max(1,Number(parts[2]||parts[1]||1)),targetC:Math.max(1,Number(parts[3]||parts[2]||parts[1]||1))};
+    }).filter(m=>m.name);
+  }
+  els('loadScalePresetBtn').onclick=()=>{
+    els('adminWodId').value='school-hyrox-scale';
+    els('adminWodTitle').value='SCHOOL HYROX · SCALE';
+    els('adminWodDesc').value='AMRAP 9분 · 나에게 맞는 스케일 선택';
+    els('adminWodMinutes').value=9;
+    els('adminMovements').value='100m 달리기|1|1|1\n버피 브로드 점프|8|6|4\n핸드 릴리즈 푸시업|10|8|5\n싯업|15|12|8\n리버스 런지|20|16|10';
+    els('adminActive').checked=true;
+    toast('스케일 WOD 예시를 불러왔습니다. 저장을 눌러 적용하세요.');
+  };
+
   els('saveWodBtn').onclick=async()=>{
     const id=els('adminWodId').value.trim(); if(!id){toast('회차 ID를 입력하세요.');return;}
     const data={title:els('adminWodTitle').value.trim(),desc:els('adminWodDesc').value.trim(),minutes:Math.max(1,Number(els('adminWodMinutes').value||10)),movements:parseMovements(),active:els('adminActive').checked,updatedAt:serverTimestamp()};
@@ -327,15 +404,16 @@
   function currentAdminRecords(){ return records.filter(r=>r.wodId===currentWod?.id); }
   function renderAdminRecords(){
     const list=currentAdminRecords();
-    els('adminRecordList').innerHTML=list.length?list.map(r=>`<div class="admin-item"><div class="row"><div style="flex:1"><b>${escapeHtml(r.athlete)}</b><div class="mini">${scoreText(r.rounds,r.extra)} · 심판 ${escapeHtml(r.judge||'-')} · RPE ${r.rpe??'-'} · HR ${r.hr??'-'}</div></div><button class="btn secondary" data-edit-rec="${r.id}">수정</button><button class="btn danger" data-del-rec="${r.id}">삭제</button></div></div>`).join(''):'<div class="empty">기록 없음</div>';
+    els('adminRecordList').innerHTML=list.length?list.map(r=>`<div class="admin-item"><div class="row"><div style="flex:1"><b>${escapeHtml(r.athlete)}</b><div class="mini">${r.scale?escapeHtml(r.scale)+' SCALE · ':''}${scoreText(r.rounds,r.extra)} · 심판 ${escapeHtml(r.judge||'-')} · RPE ${r.rpe??'-'} · HR ${r.hr??'-'}</div></div><button class="btn secondary" data-edit-rec="${r.id}">수정</button><button class="btn danger" data-del-rec="${r.id}">삭제</button></div></div>`).join(''):'<div class="empty">기록 없음</div>';
     document.querySelectorAll('[data-edit-rec]').forEach(b=>b.onclick=()=>editRecord(b.dataset.editRec)); document.querySelectorAll('[data-del-rec]').forEach(b=>b.onclick=()=>deleteRecord(b.dataset.delRec));
   }
   async function editRecord(id){
     const r=records.find(x=>x.id===id); if(!r)return;
     const athlete=prompt('학생 이름',r.athlete); if(athlete===null)return;
     const judge=prompt('심판 이름',r.judge||''); if(judge===null)return;
+    const scaleNew=(prompt('스케일 (A/B/C)',r.scale||'B')||'B').trim().toUpperCase();
     const roundsNew=Number(prompt('Round',r.rounds)); const extraNew=Number(prompt('추가 진행도',r.extra)); const rpeNew=prompt('RPE',r.rpe??''); const hrNew=prompt('심박수',r.hr??''); const noteNew=prompt('한 줄 기록',r.note||'');
-    const patch={athlete:athlete.trim(),judge:judge.trim(),rounds:Math.max(0,roundsNew||0),extra:Math.max(0,extraNew||0),rpe:rpeNew?Number(rpeNew):null,hr:hrNew?Number(hrNew):null,note:noteNew??'',updatedAt:serverTimestamp()};
+    const patch={athlete:athlete.trim(),judge:judge.trim(),scale:['A','B','C'].includes(scaleNew)?scaleNew:'B',rounds:Math.max(0,roundsNew||0),extra:Math.max(0,extraNew||0),rpe:rpeNew?Number(rpeNew):null,hr:hrNew?Number(hrNew):null,note:noteNew??'',updatedAt:serverTimestamp()};
     try{ if(db)await update(ref(db,'records/'+id),patch); else {Object.assign(r,patch);renderLeaderboard();renderAdminRecords();} }
     catch(e){console.error(e);toast('기록 수정 실패');}
   }
