@@ -34,6 +34,7 @@
     .admin-btn{position:fixed;right:16px;bottom:16px;z-index:10;border:0;border-radius:999px;background:#222c47;color:#dce6ff;padding:12px 14px;box-shadow:var(--shadow)}
     dialog{border:1px solid var(--line);border-radius:18px;background:#10172a;color:#fff;max-width:760px;width:calc(100% - 24px)}dialog::backdrop{background:rgba(0,0,0,.65)}
     .admin-list{display:grid;gap:8px;margin-top:12px}.admin-item{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0c1324}.admin-item .row{align-items:center}.mini{font-size:12px;color:var(--muted)}
+    .admin-scale-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}.admin-scale-box{border:1px solid var(--line);border-radius:14px;padding:10px;background:#0c1324}.admin-scale-box label{display:flex;align-items:center;gap:7px;font-weight:900;margin-bottom:7px}.admin-scale-box textarea{min-height:150px}.admin-scale-hint{font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px}@media(max-width:760px){.admin-scale-grid{grid-template-columns:1fr}}
     .notice{font-size:12px;color:#ffcf70;margin-top:10px;line-height:1.5}
     .toast{position:fixed;left:50%;bottom:82px;transform:translateX(-50%);background:#050914;color:#fff;padding:10px 14px;border-radius:10px;border:1px solid var(--line);display:none;z-index:20}
   </style>
@@ -145,8 +146,12 @@
   <div id="admin-wods">
     <div class="row"><div class="field"><label>회차 ID</label><input id="adminWodId" placeholder="예: 2026-09-28-1"></div><div class="field"><label>제목</label><input id="adminWodTitle"></div></div>
     <div class="row" style="margin-top:8px"><div class="field"><label>설명</label><input id="adminWodDesc"></div><div class="field"><label>제한시간(분)</label><input id="adminWodMinutes" type="number" min="1" value="10"></div></div>
-    <div class="field" style="margin-top:8px"><label>동작 입력 (동작명|A횟수|B횟수|C횟수)</label><textarea id="adminMovements" rows="7" placeholder="100m 달리기|1|1|1\n버피 브로드 점프|8|6|4\n핸드 릴리즈 푸시업|10|8|5\n싯업|15|12|8\n리버스 런지|20|16|10"></textarea><div class="mini" style="margin-top:5px">기존처럼 동작명|횟수만 입력하면 A·B·C가 모두 같은 횟수로 저장됩니다.</div></div>
-    <button type="button" class="btn secondary" id="loadScalePresetBtn" style="width:100%;margin-top:8px">이번 SCHOOL HYROX 스케일 WOD 불러오기</button>
+    <div class="admin-scale-grid">
+      <div class="admin-scale-box"><label><span class="scale-badge a">A</span> A SCALE 동작</label><textarea id="adminMovementsA" rows="7" placeholder="100m 달리기|1|회&#10;버피 브로드 점프|8|m&#10;핸드 릴리즈 푸시업|10|회&#10;싯업|15|회&#10;워킹 런지|8|m"></textarea><div class="admin-scale-hint">한 줄에 동작명|목표|단위</div></div>
+      <div class="admin-scale-box"><label><span class="scale-badge b">B</span> B SCALE 동작</label><textarea id="adminMovementsB" rows="7" placeholder="100m 달리기|1|회&#10;제자리 버피|5|회&#10;핸드 릴리즈 푸시업|8|회&#10;싯업|12|회&#10;워킹 런지|4|m"></textarea><div class="admin-scale-hint">같은 줄끼리 같은 스테이션으로 묶입니다.</div></div>
+      <div class="admin-scale-box"><label><span class="scale-badge c">C</span> C SCALE 동작</label><textarea id="adminMovementsC" rows="7" placeholder="100m 달리기|1|회&#10;제자리 버피(가슴 안 닿기)|5|회&#10;핸드 릴리즈 푸시업|5|회&#10;싯업|8|회&#10;제자리 런지|5|회"></textarea><div class="admin-scale-hint">단위는 회, m 등 자유롭게 입력</div></div>
+    </div>
+        <button type="button" class="btn secondary" id="loadScalePresetBtn" style="width:100%;margin-top:8px">이번 SCHOOL HYROX 스케일 WOD 불러오기</button>
     <label class="mini" style="display:block;margin-top:9px"><input type="checkbox" id="adminActive"> 이 WOD를 현재 회차로 사용</label>
     <button class="btn primary" id="saveWodBtn" style="width:100%;margin-top:10px">WOD 저장 / 수정</button>
     <div class="admin-list" id="adminWodList"></div>
@@ -197,11 +202,11 @@
 
   const fallbackWod = { id:'school-hyrox-scale', title:'SCHOOL HYROX · SCALE', desc:'AMRAP 9분 · 나에게 맞는 스케일 선택', minutes:9, active:true,
     movements:[
-      {name:'100m 달리기',targetA:1,targetB:1,targetC:1},
-      {name:'버피 브로드 점프',targetA:8,targetB:6,targetC:4},
-      {name:'핸드 릴리즈 푸시업',targetA:10,targetB:8,targetC:5},
-      {name:'싯업',targetA:15,targetB:12,targetC:8},
-      {name:'리버스 런지',targetA:20,targetB:16,targetC:10}
+      {name:'100m 달리기',nameA:'100m 달리기',nameB:'100m 달리기',nameC:'100m 달리기',targetA:1,targetB:1,targetC:1,unitA:'회',unitB:'회',unitC:'회'},
+      {name:'버피',nameA:'버피 브로드 점프',nameB:'제자리 버피',nameC:'제자리 버피(가슴 안 닿기)',targetA:8,targetB:5,targetC:5,unitA:'m',unitB:'회',unitC:'회'},
+      {name:'핸드 릴리즈 푸시업',nameA:'핸드 릴리즈 푸시업',nameB:'핸드 릴리즈 푸시업',nameC:'핸드 릴리즈 푸시업',targetA:10,targetB:8,targetC:5,unitA:'회',unitB:'회',unitC:'회'},
+      {name:'싯업',nameA:'싯업',nameB:'싯업',nameC:'싯업',targetA:15,targetB:12,targetC:8,unitA:'회',unitB:'회',unitC:'회'},
+      {name:'런지',nameA:'워킹 런지',nameB:'워킹 런지',nameC:'제자리 런지',targetA:8,targetB:4,targetC:5,unitA:'m',unitB:'m',unitC:'회'}
     ] };
 
   function initFirebase(){
@@ -247,6 +252,12 @@
     const raw=m?.[key] ?? m?.target ?? m?.targetB ?? m?.targetA ?? m?.targetC ?? 0;
     return Math.max(0, Number(raw||0));
   }
+  function nameFor(m, scale=selectedScale){
+    return m?.['name'+scale] ?? m?.name ?? m?.nameB ?? m?.nameA ?? m?.nameC ?? '-';
+  }
+  function unitFor(m, scale=selectedScale){
+    return m?.['unit'+scale] ?? m?.unit ?? '회';
+  }
   function scaleClass(scale){ return String(scale||'').toLowerCase(); }
   function renderScalePicker(){
     document.querySelectorAll('[data-scale]').forEach(b=>b.classList.toggle('active',b.dataset.scale===selectedScale));
@@ -265,7 +276,7 @@
   }
   function renderMovementList(){
     if(!currentWod) return;
-    els('movementList').innerHTML=(currentWod.movements||[]).map(m=>`<div class="move"><strong>${escapeHtml(m.name)}</strong><span class="target"><span class="scale-badge ${scaleClass(selectedScale)}">${selectedScale}</span><b>${targetFor(m)}회</b></span></div>`).join('');
+    els('movementList').innerHTML=(currentWod.movements||[]).map(m=>`<div class="move"><strong>${escapeHtml(nameFor(m))}</strong><span class="target"><span class="scale-badge ${scaleClass(selectedScale)}">${selectedScale}</span><b>${targetFor(m)}${escapeHtml(unitFor(m))}</b></span></div>`).join('');
   }
   function renderWod(){
     if(!currentWod) return;
@@ -289,7 +300,12 @@
 
   function updateJudgeUI(){
     const m=currentWod?.movements?.[moveIndex] || {name:'-',target:0};
-    els('roundText').textContent=rounds; els('currentMove').textContent=m.name; els('repText').textContent=rep; els('repTarget').textContent=` / ${targetFor(m)}`;
+    const unit=unitFor(m);
+    els('roundText').textContent=rounds;
+    els('currentMove').textContent=nameFor(m);
+    els('repText').textContent=rep;
+    els('repTarget').textContent=` / ${targetFor(m)}${unit}`;
+    els('plusBtn').textContent=`+ 1${unit}`;
     els('judgeAthlete').textContent=els('athleteName').value.trim() || '학생 이름을 입력하세요';
     renderScalePicker();
   }
@@ -354,27 +370,49 @@
   els('adminLoginBtn').onclick=()=>{ if(els('adminPassword').value==='2456'){passwordDialog.close();adminDialog.showModal();fillAdminForm(currentWod);} else toast('비밀번호가 올바르지 않습니다.'); };
   els('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter')els('adminLoginBtn').click()});
 
+  function scaleLines(w, scale){
+    return (w.movements||[]).map(m=>`${nameFor(m,scale)}|${targetFor(m,scale)}|${unitFor(m,scale)}`).join('\n');
+  }
   function fillAdminForm(w){
     if(!w)return;
     els('adminWodId').value=w.id;els('adminWodTitle').value=w.title||'';els('adminWodDesc').value=w.desc||'';els('adminWodMinutes').value=w.minutes||10;
-    els('adminMovements').value=(w.movements||[]).map(m=>`${m.name}|${targetFor(m,'A')}|${targetFor(m,'B')}|${targetFor(m,'C')}`).join('\n');
+    els('adminMovementsA').value=scaleLines(w,'A');
+    els('adminMovementsB').value=scaleLines(w,'B');
+    els('adminMovementsC').value=scaleLines(w,'C');
     els('adminActive').checked=!!w.active;
   }
+  function parseScaleLines(id){
+    return els(id).value.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{
+      const parts=line.split('|').map(x=>x.trim());
+      return {name:parts[0]||'',target:Math.max(1,Number(parts[1]||1)),unit:parts[2]||'회'};
+    }).filter(x=>x.name);
+  }
   function parseMovements(){
-    return els('adminMovements').value.split('\n').map(x=>x.trim()).filter(Boolean).map(line=>{
-      const parts=line.split('|').map(x=>x.trim()); const name=parts[0]||'';
-      if(parts.length===2){ const t=Math.max(1,Number(parts[1]||1)); return {name,targetA:t,targetB:t,targetC:t}; }
-      return {name,targetA:Math.max(1,Number(parts[1]||1)),targetB:Math.max(1,Number(parts[2]||parts[1]||1)),targetC:Math.max(1,Number(parts[3]||parts[2]||parts[1]||1))};
-    }).filter(m=>m.name);
+    const a=parseScaleLines('adminMovementsA'), b=parseScaleLines('adminMovementsB'), c=parseScaleLines('adminMovementsC');
+    const count=Math.max(a.length,b.length,c.length);
+    const result=[];
+    for(let i=0;i<count;i++){
+      const A=a[i]||b[i]||c[i], B=b[i]||a[i]||c[i], C=c[i]||b[i]||a[i];
+      if(!A && !B && !C) continue;
+      result.push({
+        name:A?.name||B?.name||C?.name||'동작',
+        nameA:A?.name||'동작', nameB:B?.name||A?.name||'동작', nameC:C?.name||B?.name||A?.name||'동작',
+        targetA:A?.target||1, targetB:B?.target||A?.target||1, targetC:C?.target||B?.target||A?.target||1,
+        unitA:A?.unit||'회', unitB:B?.unit||A?.unit||'회', unitC:C?.unit||B?.unit||A?.unit||'회'
+      });
+    }
+    return result;
   }
   els('loadScalePresetBtn').onclick=()=>{
     els('adminWodId').value='school-hyrox-scale';
     els('adminWodTitle').value='SCHOOL HYROX · SCALE';
     els('adminWodDesc').value='AMRAP 9분 · 나에게 맞는 스케일 선택';
     els('adminWodMinutes').value=9;
-    els('adminMovements').value='100m 달리기|1|1|1\n버피 브로드 점프|8|6|4\n핸드 릴리즈 푸시업|10|8|5\n싯업|15|12|8\n리버스 런지|20|16|10';
+    els('adminMovementsA').value='100m 달리기|1|회\n버피 브로드 점프|8|m\n핸드 릴리즈 푸시업|10|회\n싯업|15|회\n워킹 런지|8|m';
+    els('adminMovementsB').value='100m 달리기|1|회\n제자리 버피|5|회\n핸드 릴리즈 푸시업|8|회\n싯업|12|회\n워킹 런지|4|m';
+    els('adminMovementsC').value='100m 달리기|1|회\n제자리 버피(가슴 안 닿기)|5|회\n핸드 릴리즈 푸시업|5|회\n싯업|8|회\n제자리 런지|5|회';
     els('adminActive').checked=true;
-    toast('스케일 WOD 예시를 불러왔습니다. 저장을 눌러 적용하세요.');
+    toast('새 스케일 WOD를 불러왔습니다. 저장을 눌러 적용하세요.');
   };
 
   els('saveWodBtn').onclick=async()=>{
